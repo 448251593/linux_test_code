@@ -1,7 +1,7 @@
 #include<stdio.h>
 void fun()
 {
-
+laksdjf
 
 }
 int main()
