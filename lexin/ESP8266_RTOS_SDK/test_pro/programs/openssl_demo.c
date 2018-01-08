@@ -13,9 +13,13 @@
 #define OPENSSL_DEMO_FRAGMENT_SIZE 8192
 
 #define OPENSSL_DEMO_LOCAL_TCP_PORT 1000
+//http://p1.pstatp.com/origin/3ecc0001f2adaecc0dd4
 
-#define OPENSSL_DEMO_TARGET_NAME "f.hiphotos.baidu.com"
-#define OPENSSL_DEMO_TARGET_PATH "/image/pic/item/a5c27d1ed21b0ef4069800b4d7c451da80cb3ee3.jpg"
+#define OPENSSL_DEMO_TARGET_NAME "p1.pstatp.com"
+#define OPENSSL_DEMO_TARGET_PATH "/origin/3ecc0001f2adaecc0dd4"
+
+//#define OPENSSL_DEMO_TARGET_NAME "f.hiphotos.baidu.com"
+//#define OPENSSL_DEMO_TARGET_PATH "/image/pic/item/a5c27d1ed21b0ef4069800b4d7c451da80cb3ee3.jpg"
 
 #define OPENSSL_DEMO_TARGET_TCP_PORT 80
 #define OPENSSL_DEMO_REQUEST "GET "OPENSSL_DEMO_TARGET_PATH" HTTP/1.1\r\n" \
@@ -37,6 +41,49 @@ LOCAL char send_data[] = OPENSSL_DEMO_REQUEST;
 LOCAL int send_bytes = sizeof(send_data);
 
 LOCAL char recv_buf[OPENSSL_DEMO_RECV_BUF_LEN];
+
+
+typedef struct  
+{
+	 int offset;
+	 int total_len;
+	unsigned char *pdata;
+	 int pdata_len;	
+}write_info_struct;
+
+write_info_struct write_info;
+
+void  init_write_info(write_info_struct * p_write_info)
+{
+
+	p_write_info->offset = 0;
+	p_write_info->total_len = 0;
+	p_write_info->pdata = 0;	
+	p_write_info->pdata_len = 0;
+
+}
+
+
+
+int  write_img_flash(write_info_struct * p_write_info)
+{
+
+	printf("write offset=%d, len= %d\n",p_write_info->offset,p_write_info->pdata_len);
+	
+	p_write_info->offset = p_write_info->offset + p_write_info->pdata_len;
+
+	if(p_write_info->offset == p_write_info->total_len)
+	{
+		printf("all file recv\n");
+	}
+	
+}
+
+
+
+
+
+
 
 LOCAL void httpdownload_demo_thread(void *p)
 {
@@ -104,13 +151,14 @@ LOCAL void httpdownload_demo_thread(void *p)
     os_printf("OK\n\n");
 
 
-
+	
+	
 	//接收
 	int header_end_flag =0;
 	recv_heard_data_len = 0;
     do {		       	
 		//------4个\r\n处理
-		if(header_end_flag == 0)
+		if(header_end_flag < 2)
         {  
 	        ret = recv(socket, recv_buf, 1, 0); 
 	        if (ret <= 0) {
@@ -119,20 +167,26 @@ LOCAL void httpdownload_demo_thread(void *p)
 	        }
 //          printf("%c", recv_buf[0]);
 			recv_heard_data[recv_heard_data_len++] = recv_buf[0];
-			char *p1 = strstr(recv_heard_data,"Content-Length");
-			if(p1)
+			if (header_end_flag < 1)
 			{
-				char *p2 = strstr(p1,":");
-				char *p3 = strstr(p1,"\r\n");
-				if(p2 && p3)
+			    char *p1 = strstr(recv_heard_data,"Content-Length");
+				if(p1)
 				{
-					recv_body_data_len = atoi(p2+1);
-					os_printf("Content-Length=%d\n",atoi(p2+1));
+					char *p2 = strstr(p1,":");
+					char *p3 = strstr(p1,"\r\n");
+					if(p2 && p3)
+					{
+						recv_body_data_len = atoi(p2+1);
+						os_printf("Content-Length=%d\n",atoi(p2+1));
+						header_end_flag = 1;
+						write_info.total_len = recv_body_data_len;
+					}
 				}
 			}
+			
 			if(strstr(recv_heard_data,"\r\n\r\n"))
 			{
-				header_end_flag = 1;
+				header_end_flag = 2;
 			}
         }
 		else
@@ -143,7 +197,11 @@ LOCAL void httpdownload_demo_thread(void *p)
 	            break;
 	        }
 		    recv_bytes += ret;
-			os_printf("downloading... %d%%\n", recv_bytes*100/recv_body_data_len);						
+			os_printf("downloading... %d%%\n", recv_bytes*100/recv_body_data_len);		
+			write_info.pdata = recv_buf;
+			write_info.pdata_len= ret;			
+			write_img_flash(&write_info);
+			
 			if(recv_bytes==recv_body_data_len)
 			{
 				break;
@@ -175,6 +233,7 @@ failed1:
 void user_conn_init(void)
 {
     int ret;
+	init_write_info(&write_info);
 
     ret = xTaskCreate(httpdownload_demo_thread,
                       OPENSSL_DEMO_THREAD_NAME,

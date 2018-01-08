@@ -110,4 +110,7 @@ void user_init(void)
     wifi_station_set_config(&config);
 
     wifi_set_event_handler_cb(wifi_event_handler_cb);
+    printf("current flash flag is %d. current user bin is %d\r\n", system_upgrade_flag_check(), 
+    system_upgrade_userbin_check());
+	printf("current user bin addr %x\r\n", system_get_userbin_addr());
 }
