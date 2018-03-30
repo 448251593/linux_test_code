@@ -116,16 +116,104 @@ int  send_code_to_ir(char *pdata, int len)
 
 	free(pitem);
 }
+#define HEAT_SHRINK_BUF_SIZE 1024
+typedef struct 
+{
+	uint32_t  				infrared_wave_data[200];
+//	char      				infrared_wave_data_split[200];//接收码值中断标记 1 
+	int       				wave_data_len;
+//	learn_mode_enum      	learn_flag;//锁定标识; -1 -> 完整结束 ;0->新建立一个码值;//1->接收中
+//	char 					key[24];
+}learn_wave_struct;
+learn_wave_struct learn_wave_data_buf;
+typedef unsigned char uint8_t;
 
+int  get_learn_code(char *k,char *pout, int *len)
+{
+    int ulI = 0;
+	learn_wave_struct *pln_code = &learn_wave_data_buf;
+	
+	//--------------------------------------------------------
+	char *heat_shrink_buf = NULL;
+	int   heat_shrink_buf_len = *len;
+	char *heat_shrink_buf_after = NULL;
+	rmt_item32_t  *tmp_code;
+	
+	heat_shrink_buf = pout;//(char *) malloc(HEAT_SHRINK_BUF_SIZE);
+	
+	if (heat_shrink_buf == NULL)
+	{		
+		return -4;		
+	}
+	
+	heat_shrink_buf_after = (char *) malloc(HEAT_SHRINK_BUF_SIZE/2);
+	if (heat_shrink_buf_after == NULL)
+	{
+	    return -4;
+	}
+	
+	memset(heat_shrink_buf, 0, heat_shrink_buf_len);
+	memset(heat_shrink_buf_after, 0, HEAT_SHRINK_BUF_SIZE/2);
+	
+	int	i = 0;
+	for ( ulI = 0; ulI < pln_code->wave_data_len; ulI++ )  
+	{		
+		tmp_code = (rmt_item32_t*)(&pln_code->infrared_wave_data[ulI]); 
+		i += snprintf((char*)(heat_shrink_buf + i), heat_shrink_buf_len - i, "%d,", tmp_code->duration0);
+		i += snprintf((char*)(heat_shrink_buf + i), heat_shrink_buf_len - i, "%d,", tmp_code->duration1);
+	}
+	//delete last ',' 
+	heat_shrink_buf[strlen(heat_shrink_buf) - 1] = '\0';
+	printf("heat_shrink_buf=%s\n", heat_shrink_buf);
+	//压缩
+//	int en_len = encode_chuangmi_app((uint8_t *)heat_shrink_buf, i,(uint8_t *) heat_shrink_buf_after, HEAT_SHRINK_BUF_SIZE/2);
+	//base64
+//	memset(heat_shrink_buf, 0, heat_shrink_buf_len);
+//	int len_base64 = Base64Encode(heat_shrink_buf_after, en_len, heat_shrink_buf);
+	free(heat_shrink_buf_after);
+	
+
+//	*pout = heat_shrink_buf;
+//	*len = len_base64;
+	
+	return 0;
+}
 int main()
 {
-	char *tmp = 0;
-	tmp = malloc(strlen(str_code)+1);
-	memset(tmp, 0, strlen(str_code)+1);
-	strcpy(tmp,str_code);
-	send_code_to_ir((char*)tmp, strlen(tmp));
+    int ulI = 0;
 
+	
+//	char *tmp = 0;
+//	tmp = malloc(strlen(str_code)+1);
+
+//	memset(tmp, 0, strlen(str_code)+1);
+//	strcpy(tmp,str_code);
+//	send_code_to_ir((char*)tmp, strlen(tmp));
+
+//	free(tmp);
+
+
+	char *tmp = 0;
+	int  len=2048;
+	rmt_item32_t  item;
+
+	tmp = malloc(2048);
+
+
+	
+	for ( ulI = 0; ulI < 10; ulI++ )
+	{
+		item.duration0 = 100;
+		item.duration1 = 200;		
+	    learn_wave_data_buf.infrared_wave_data[ulI] = (item.val);
+		
+	}
+	learn_wave_data_buf.wave_data_len = ulI;
+	get_learn_code("111", tmp, &len);
+	
 	free(tmp);
+
+	
 	return 0;
 }
 

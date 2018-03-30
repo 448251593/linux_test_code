@@ -632,96 +632,100 @@ static void proc_args(config *cfg, int argc, char **argv) {
     if (argc > 0) { cfg->out_fname = argv[0]; }
 }
 
+int decode_chuangmi_app(uint8_t *encode_char, ssize_t encode_char_len , uint8_t *encode_out_char, size_t *encode_out_charlen)
+{
+		 config cfg;
+		memset(&cfg, 0, sizeof(cfg));
+	//----------------test------------------------
+	cfg.window_sz2 = DEF_WINDOW_SZ2;
+	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
+	cfg.buffer_size = DEF_BUFFER_SIZE;
+	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
+	cfg.cmd = OP_DEC;
+	cfg.verbose = 0;
+	cfg.in_fname = "-";
+	cfg.out_fname = "-";
+	
+//	memset(encode_out_char, 0x00, sizeof(encode_out_char));
+
+
+	decode_chuangmi(&cfg, (uint8_t *)encode_char, encode_char_len, (uint8_t *)encode_out_char, encode_out_charlen);
+
+	printf("decode_out_charlen= %d\n", *encode_out_charlen);
+	size_t ulI;
+	for ( ulI = 0; ulI < *encode_out_charlen; ulI++ )
+	{
+	    printf("%c", encode_out_char[ulI]);
+	}
+
+	printf("\n");
+	return 0;
+
+}
+
 int main(int argc, char **argv) {
     config cfg;
     memset(&cfg, 0, sizeof(cfg));
 
 //----------------test------------------------
-	cfg.window_sz2 = DEF_WINDOW_SZ2;
-	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
-	cfg.buffer_size = DEF_BUFFER_SIZE;
-	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
-	cfg.cmd = OP_ENC;
-	cfg.verbose = 0;
-	cfg.in_fname = "-";
-	cfg.out_fname = "-";
-
-	
-	char encode_char[100] ;
-	char encode_out_char[100];
-	size_t  encode_out_charlen = 0;
-
-
-	memset(encode_char, 0x31, sizeof(encode_char));
-	memset(encode_out_char, 0x00, sizeof(encode_out_char));
-
-	encode_chuangmi(&cfg, (uint8_t *)encode_char, sizeof(encode_char), (uint8_t *)encode_out_char, &encode_out_charlen);
-
-	printf("encode_out_charlen= %d\n", (int)encode_out_charlen);
-	size_t ulI;
-	for ( ulI = 0; ulI < encode_out_charlen; ulI++ )
-	{
-	    printf("0x%x,", encode_out_char[ulI]);
-	}
-
-	printf("\n");
-	return 0;
-//----------------test------------------------
 //	cfg.window_sz2 = DEF_WINDOW_SZ2;
 //	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
 //	cfg.buffer_size = DEF_BUFFER_SIZE;
 //	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
-//	cfg.cmd = OP_DEC;
+//	cfg.cmd = OP_ENC;
 //	cfg.verbose = 0;
 //	cfg.in_fname = "-";
 //	cfg.out_fname = "-";
-
+//
 //	
-//	unsigned char encode_char[100] ;
-//	char encode_out_char[200];
+//	char encode_char[100] ;
+//	char encode_out_char[100];
 //	size_t  encode_out_charlen = 0;
-
-//	encode_char[0] = 0x98;
-//	
-//	encode_char[1] = 0x80;
-//	encode_char[2] = 0x07;
-//	
-//	encode_char[3] = 0x80;
-//	encode_char[4] = 0x07;
-//	
-//	encode_char[5] = 0x80;
-//	encode_char[6] = 0x07;
-//	
-//	encode_char[7] = 0x80;
-//	encode_char[8] = 0x07;
-//	 
-//	encode_char[9] = 0x80;
-//	encode_char[10] = 0x07;
-//	
-//	encode_char[11] = 0x80;
-//	encode_char[12] = 0x07;
-//	
-//	encode_char[13] = 0x80;
-//	
-
-//	encode_char[14] = 0x01;
-//	encode_char[15] = 0x00;
-//	encode_char[16] = 0x98;
-
-//	
+//
+//
+//	memset(encode_char, 0x31, sizeof(encode_char));
 //	memset(encode_out_char, 0x00, sizeof(encode_out_char));
-
-//	decode_chuangmi(&cfg, (uint8_t *)encode_char, 16, (uint8_t *)encode_out_char, &encode_out_charlen);
-
-//	printf("decode_out_charlen= %d\n",(int) encode_out_charlen);
+//
+//	encode_chuangmi(&cfg, (uint8_t *)encode_char, sizeof(encode_char), (uint8_t *)encode_out_char, &encode_out_charlen);
+//
+//	printf("encode_out_charlen= %d\n", (int)encode_out_charlen);
 //	size_t ulI;
 //	for ( ulI = 0; ulI < encode_out_charlen; ulI++ )
 //	{
 //	    printf("0x%x,", encode_out_char[ulI]);
 //	}
-
+//
 //	printf("\n");
 //	return 0;
+//----------------test------------------------
+
+	
+	cfg.window_sz2 = DEF_WINDOW_SZ2;
+	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
+	cfg.buffer_size = DEF_BUFFER_SIZE;
+	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
+	cfg.cmd = OP_DEC;
+	cfg.verbose = 0;
+	cfg.in_fname = "-";
+	cfg.out_fname = "-";
+
+	
+	unsigned char encode_char[]={
+		 153, 77, 166, 115, 137, 100, 226, 115, 52, 150, 77, 38, 160, 6, 64, 22, 64, 15, 115, 137, 196, 204, 1, 226, 99, 51, 154, 76, 192, 32, 166, 160, 65, 64, 56, 64, 15, 128, 47, 224, 161, 224, 14, 115, 112, 15, 137, 204, 194, 100, 9, 229, 49, 3, 127, 3, 255, 2, 250, 152, 129, 123, 0, 250, 129, 249, 205, 38, 97, 30, 161, 80, 224, 175, 96, 63, 97, 161, 160, 190, 211, 57, 156, 178, 109, 57, 152, 206, 102, 114, 193, 3, 96, 218, 241, 3, 249, 160, 129, 248, 121, 248, 113, 248, 11, 248, 23, 248, 129, 216, 19, 248, 31, 248, 43, 168, 23, 172, 192, 58, 240, 56, 212, 37, 204, 64, 252, 64, 236, 86, 228, 9, 236, 64, 214, 97, 49, 156, 73, 132, 15, 194, 11, 8, 31, 196, 15, 194, 175, 192, 31, 192, 31, 200, 31, 200, 31, 196, 143, 195, 46, 7, 255, 199, 255, 192, 191, 199, 255, 199, 255, 199, 255, 194, 171, 199, 255, 230, 115, 64, 91, 48, 40, 240, 251, 241, 255, 240, 251, 240, 31, 49, 255, 240, 39, 240, 251, 240, 251, 241, 247, 179, 188, 144, 251, 242, 200, 241, 247, 249, 168
+		
+	};
+	
+	char encode_out_char[2000];
+	size_t  encode_out_charlen = 0;
+
+	memset(encode_out_char, 0, sizeof(encode_out_char));
+	decode_chuangmi_app(encode_char, 211, encode_out_char, &encode_out_charlen);
+	
+	
+	printf("%s\n",encode_out_char);
+	
+	
+	return 0;
 
 
 //----------------test------------------------

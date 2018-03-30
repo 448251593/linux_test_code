@@ -23,7 +23,8 @@ GEN_BINS= eagle.app.v6.bin
 SPECIAL_MKTARGETS=$(APP_MKTARGETS)
 SUBDIRS=    \
 	user    \
-	programs
+	programs \
+	fota
 
 endif # } PDIR
 
@@ -47,7 +48,8 @@ endif
 
 COMPONENTS_eagle.app.v6 = \
 	user/libuser.a  \
-	programs/openssl_demo.a
+	programs/openssl_demo.a	\
+	fota/libfota.a
 
 LINKFLAGS_eagle.app.v6 =    \
     -L$(SDK_PATH)/lib       \
@@ -72,7 +74,8 @@ LINKFLAGS_eagle.app.v6 =    \
     -lopenssl               \
     -lwpa                   \
     $(DEP_LIBS_eagle.app.v6)\
-    -Wl,--end-group
+    -Wl,--end-group			\
+	
 
 DEPENDS_eagle.app.v6 = \
                 $(LD_FILE) \

@@ -116,24 +116,52 @@ void  deal_get_timestamp(char *pfile_in,char *pfile_out)
 	}
 }
 
+void run_cmd(const char *cmd, char *output, int outsize)
+{
+	FILE *pipe = popen(cmd, "r");
+	if (!pipe)
+		return;
+	if (NULL != output) {
+		fgets(output, outsize, pipe);
+	}
+	pclose(pipe);
+}
+const char  *find_all_cmd = "find /mnt/media/mmcblk0p1/MIJIA_RECORD_VIDEO -name \"*.mp4\" > /tmp/allfile.txt";
+const char  *sort_timestamp = "sort /tmp/allfile_ts.txt > /tmp/allfile_ts.sort";
 int main(int argn ,char *args[])
 {
+	char  rslt[128];
+	/*
+	find ./ -name "*.mp4" > /tmp/allfile.txt
+	#通过程序截取文件名中的时间戳.. 1 表示截取时间戳 
+	./exescanfile 1 /tmp/allfile.txt /tmp/allfile_ts.txt
+	#排序
+	sort /tmp/allfile_ts.txt > /tmp/allfile_ts.sort
+	#通过程序转换成hex
+	./exescanfile 2 /tmp/allfile_ts.sort /tmp/allfile_ts.32bit
+	#拷贝更新时间戳文件
+	#cp /tmp/allfile_ts.32bit /mnt/media/mmcblk0p1/MIJIA_RECORD_VIDEO/.timestamp -rf
+	cp /tmp/allfile_ts.32bit ./timestamp -rf
+
+	rm /tmp/allfile.txt
+	rm /tmp/allfile_ts.txt
+	rm /tmp/allfile_ts.sort
+	rm /tmp/allfile_ts.32bit
+	*/
+	run_cmd(find_all_cmd, rslt, sizeof(rslt));
 	
-	if(argn != 4)
-	{
-		printf("./exe file_in file_out\n");
-		return 0;
-	}
-	//printf("filein name=%s,fileout name=%s\n",args[2],args[3]);
+	deal_get_timestamp("/tmp/allfile.txt","/tmp/allfile_ts.txt");
 	
-	if(*args[1] == '1')
-	{
-		deal_get_timestamp(args[2],args[3]);	
-	}
-	else if(*args[1] == '2')
-	{		
-		convert_to_timestamp(args[2],args[3]);		
-	}
+	run_cmd(sort_timestamp, rslt, sizeof(rslt));
+	
+	convert_to_timestamp("/tmp/allfile_ts.sort","/tmp/allfile_ts.32bit");
+	
+	run_cmd("cp /tmp/allfile_ts.32bit /mnt/media/mmcblk0p1/MIJIA_RECORD_VIDEO/.timestamp -rf", rslt, sizeof(rslt));
+	
+	run_cmd("rm /tmp/allfile.txt", rslt, sizeof(rslt));
+	run_cmd("rm /tmp/allfile_ts.txt", rslt, sizeof(rslt));
+	run_cmd("rm /tmp/allfile_ts.sort", rslt, sizeof(rslt));
+	run_cmd("rm /tmp/allfile_ts.32bit", rslt, sizeof(rslt));
 	
 	return 0;
 }
