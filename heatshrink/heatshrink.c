@@ -307,7 +307,7 @@ static int encode(config *cfg) {
     close_and_report(cfg);
     return 0;
 }
-#define    BUF_SIZE         1024
+#define    BUF_SIZE         1524
 static int encoder_sink_read_chuangmi(config *cfg, heatshrink_encoder *hse,
         uint8_t *data, size_t data_sz,  uint8_t *pdata_out, size_t *data_sz_out ) {
         
@@ -491,6 +491,7 @@ static int encode_chuangmi(config *cfg, uint8_t *input_arg , ssize_t read_sz_arg
 		
 		read_sz = 0;
     }
+	printf("heat decode=%d\n", count_size);
 	*pdecode_out_len = count_size;
 	
     if (read_sz == -1) { HEATSHRINK_ERR(1, "read"); }
@@ -655,51 +656,63 @@ int decode_chuangmi_app(uint8_t *encode_char, ssize_t encode_char_len , uint8_t 
 	size_t ulI;
 	for ( ulI = 0; ulI < *encode_out_charlen; ulI++ )
 	{
-	    printf("%c", encode_out_char[ulI]);
+	    printf("%02x,", encode_out_char[ulI]);
 	}
 
 	printf("\n");
 	return 0;
 
 }
+void trim_chr(char *psrc, int len, char ch);
 
 int main(int argc, char **argv) {
     config cfg;
     memset(&cfg, 0, sizeof(cfg));
-
+#if  0
 //----------------test------------------------
-//	cfg.window_sz2 = DEF_WINDOW_SZ2;
-//	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
-//	cfg.buffer_size = DEF_BUFFER_SIZE;
-//	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
-//	cfg.cmd = OP_ENC;
-//	cfg.verbose = 0;
-//	cfg.in_fname = "-";
-//	cfg.out_fname = "-";
-//
-//	
-//	char encode_char[100] ;
-//	char encode_out_char[100];
-//	size_t  encode_out_charlen = 0;
-//
-//
-//	memset(encode_char, 0x31, sizeof(encode_char));
-//	memset(encode_out_char, 0x00, sizeof(encode_out_char));
-//
-//	encode_chuangmi(&cfg, (uint8_t *)encode_char, sizeof(encode_char), (uint8_t *)encode_out_char, &encode_out_charlen);
-//
-//	printf("encode_out_charlen= %d\n", (int)encode_out_charlen);
-//	size_t ulI;
-//	for ( ulI = 0; ulI < encode_out_charlen; ulI++ )
-//	{
-//	    printf("0x%x,", encode_out_char[ulI]);
-//	}
-//
-//	printf("\n");
-//	return 0;
-//----------------test------------------------
+	cfg.window_sz2 = DEF_WINDOW_SZ2;
+	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
+	cfg.buffer_size = DEF_BUFFER_SIZE;
+	cfg.decoder_input_buffer_size = DEF_DECODER_INPUT_BUFFER_SIZE;
+	cfg.cmd = OP_ENC;
+	cfg.verbose = 0;
+	cfg.in_fname = "-";
+	cfg.out_fname = "-";
 
 	
+	char encode_char[]="4518,4456,569,556,569,1687,569,1687,569,1687,569,557,569,557,569,557,569,557,569,557,569,1687,569,1687,569,1687,569,557,569,557,569,557,569,557,568,557,569,557,569,1687,569,557,569,1687,569,557,569,557,569,557,569,1688,568,1687,569,557,569,1687,569,557,569,1688,568,1687,569,1687,569,46515,4518,4454,569,1688,569,96294";
+	char encode_out_char[500];
+	size_t  encode_out_charlen = 0;
+	
+
+	//memset(encode_char, 0x31, sizeof(encode_char));
+	memset(encode_out_char, 0x00, sizeof(encode_out_char));
+
+	encode_chuangmi(&cfg, (uint8_t *)encode_char, sizeof(encode_char), (uint8_t *)encode_out_char, &encode_out_charlen);
+
+	printf("encode_out_charlen= %d\n", (int)encode_out_charlen);
+	size_t ulI;
+	for ( ulI = 0; ulI < encode_out_charlen; ulI++ )
+	{
+	    printf("%02x,", (unsigned char)encode_out_char[ulI]);
+	}
+	printf("\n");
+	char base64_out[1024];
+	memset(base64_out, 0x00, sizeof(base64_out));
+	int len = Base64Encode(encode_out_char, encode_out_charlen, base64_out);
+	printf("base64out len=%d\n,%s\n", len, base64_out);
+	
+	//for ( ulI = 0; ulI < len; ulI++ )
+	//{
+	//    printf("0x%x,", base64_out[ulI]);
+	//}
+	
+	
+	printf("\n");
+	return 0;
+//----------------test------------------------
+
+#else	
 	cfg.window_sz2 = DEF_WINDOW_SZ2;
 	cfg.lookahead_sz2 = DEF_LOOKAHEAD_SZ2;
 	cfg.buffer_size = DEF_BUFFER_SIZE;
@@ -709,17 +722,41 @@ int main(int argc, char **argv) {
 	cfg.in_fname = "-";
 	cfg.out_fname = "-";
 
-	
+
+//	unsigned char encode_char[]={
+//		 153, 77, 166, 115, 137, 100, 226, 115, 52, 150, 77, 38, 160, 6, 64, 22, 64, 15, 115, 137, 196, 204, 1, 226, 99, 51, 154, 76, 192, 32, 166, 160, 65, 64, 56, 64, 15, 128, 47, 224, 161, 224, 14, 115, 112, 15, 137, 204, 194, 100, 9, 229, 49, 3, 127, 3, 255, 2, 250, 152, 129, 123, 0, 250, 129, 249, 205, 38, 97, 30, 161, 80, 224, 175, 96, 63, 97, 161, 160, 190, 211, 57, 156, 178, 109, 57, 152, 206, 102, 114, 193, 3, 96, 218, 241, 3, 249, 160, 129, 248, 121, 248, 113, 248, 11, 248, 23, 248, 129, 216, 19, 248, 31, 248, 43, 168, 23, 172, 192, 58, 240, 56, 212, 37, 204, 64, 252, 64, 236, 86, 228, 9, 236, 64, 214, 97, 49, 156, 73, 132, 15, 194, 11, 8, 31, 196, 15, 194, 175, 192, 31, 192, 31, 200, 31, 200, 31, 196, 143, 195, 46, 7, 255, 199, 255, 192, 191, 199, 255, 199, 255, 199, 255, 194, 171, 199, 255, 230, 115, 64, 91, 48, 40, 240, 251, 241, 255, 240, 251, 240, 31, 49, 255, 240, 39, 240, 251, 240, 251, 241, 247, 179, 188, 144, 251, 242, 200, 241, 247, 249, 168
+//		
+//	};
 	unsigned char encode_char[]={
-		 153, 77, 166, 115, 137, 100, 226, 115, 52, 150, 77, 38, 160, 6, 64, 22, 64, 15, 115, 137, 196, 204, 1, 226, 99, 51, 154, 76, 192, 32, 166, 160, 65, 64, 56, 64, 15, 128, 47, 224, 161, 224, 14, 115, 112, 15, 137, 204, 194, 100, 9, 229, 49, 3, 127, 3, 255, 2, 250, 152, 129, 123, 0, 250, 129, 249, 205, 38, 97, 30, 161, 80, 224, 175, 96, 63, 97, 161, 160, 190, 211, 57, 156, 178, 109, 57, 152, 206, 102, 114, 193, 3, 96, 218, 241, 3, 249, 160, 129, 248, 121, 248, 113, 248, 11, 248, 23, 248, 129, 216, 19, 248, 31, 248, 43, 168, 23, 172, 192, 58, 240, 56, 212, 37, 204, 64, 252, 64, 236, 86, 228, 9, 236, 64, 214, 97, 49, 156, 73, 132, 15, 194, 11, 8, 31, 196, 15, 194, 175, 192, 31, 192, 31, 200, 31, 200, 31, 196, 143, 195, 46, 7, 255, 199, 255, 192, 191, 199, 255, 199, 255, 199, 255, 194, 171, 199, 255, 230, 115, 64, 91, 48, 40, 240, 251, 241, 255, 240, 251, 240, 31, 49, 255, 240, 39, 240, 251, 240, 251, 241, 247, 179, 188, 144, 251, 242, 200, 241, 247, 249, 168
-		
-	};
+0x9a,0x4d,0x66,0x33,0x89,0x64,0xd2,0x69,0x35,0x9b,0x4b,0x26,0xb3,0x69,0xcc,0xb2,0x6a,0x00,0xed,0x31,0x9b,0x4e,0x26,0xe0,0x11,0xe0,0x10,0xd3,0x59,0xa8,0x03,0xf8,0x03,0xec,0x82,0x13,0x09,0x00,0xa7,	0x03,0xcf,0x04,0x5f,0x00,0x7f,0x00,0x78,0x9c,0x00,0xbf,0x81,0xc7,0x83,0x32,0x00,0x9f,0x80,0x3f,	0x81,0xa1,0x82,0x49,0x02,0x69,0x01,0x4f,0x80,0x87,0x81,0x57,0x81,0x16,0x4d,0x26,0xd3,0x59,0x8c,	0xd6,0x58,0x24,0xef,0x34,0x02,0xeb,0x9c,0xcb,0x27,0x33,0x69,0x94,0xe6,0x69,0x00};
+	
+
+	char base64_out[512];
+	char pbase64str[256];//="mk1mM4lk0mk1m0sms2nMsmoA7TGbTibgEeAQ01moA\/gD+Bz4BHgVeAP04AX8DjwEPAH8CBQRiBKICnwEPAq8CLJpNprMZrLBIXmgF1zmWTmbTKczQA==";
+	//char *pbase64str="mk1mM4lk0mk1m0sms2nMsmoA7TGbTibgEeAQ01moA/gD+Bz4BHgVeAP04AX8DjwEPAH8CBQRiBKICnwEPAq8CLJpNprMZrLBIXmgF1zmWTmbTKczSAA=";
+	memset(pbase64str, 0x00, sizeof(pbase64str));
+	strcpy(pbase64str, "nMwmEwlk0moAhTaYzCWTGbTgAhZqAPwDHgMeAx4DHgIeAP4A\/gD+AP4KHgD+AP4HHgIeBT4DHgIPMhLiAa8AfwO\/AY8AfwB\/AH8EjwB\/AH8AfwB\/AH8AfwB\/AH8AeJoIYhIPgWeGL4DHgMeAx4CHgU+AP4A\/gD+Ch4DHgD+AP4HGAEeBV4DHkhYBV4A\/gD+AP4A\/gD+AP4A\/gD+AP4A\/gD+AP4A\/h9eJb4BBiFkA");
+	
+
+	trim_chr(pbase64str,strlen(pbase64str) ,'\\');
+	printf("\nBase64Decode-----bbb---->len=%d,%s\n",strlen(pbase64str), pbase64str);
+
+	int n = Base64Decode(pbase64str, strlen(pbase64str), base64_out);
+
+
+	printf("\nBase64Decode------------>len=%d\n", n);
+	for(int size_kukong = 0; size_kukong < n; size_kukong++)
+	{
+		printf("%02x,",(unsigned char)base64_out[size_kukong]);
+	}
+	printf("\nBase64Decode----bcg-------->end\n");
 	
 	char encode_out_char[2000];
 	size_t  encode_out_charlen = 0;
+	memset(encode_out_char, 0x00, sizeof(encode_out_char));
 
 	memset(encode_out_char, 0, sizeof(encode_out_char));
-	decode_chuangmi_app(encode_char, 211, encode_out_char, &encode_out_charlen);
+	decode_chuangmi_app(base64_out, n, encode_out_char, &encode_out_charlen);
 	
 	
 	printf("%s\n",encode_out_char);
@@ -727,7 +764,7 @@ int main(int argc, char **argv) {
 	
 	return 0;
 
-
+#endif
 //----------------test------------------------
 
 	proc_args(&cfg, argc, argv);
@@ -759,4 +796,112 @@ int main(int argc, char **argv) {
     } else {
         usage();
     }
+}
+
+
+/* ----------------base64 from:http://base64.sourceforge.net/ ----------------- */
+
+/*
+** Translation Table as described in RFC1113
+*/
+static const char cb64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+/*
+** Translation Table to decode (created by author)
+*/
+static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
+
+
+void trim_chr(char *psrc, int len, char ch)
+{
+	int i;
+	for(i = len; i >= 0; i--)
+	{
+		if(*(psrc+i) == ch )
+		{
+			memmove(psrc+i, psrc+i+1, len - i);
+		}
+	}
+}
+
+/*
+** decodeblock
+**
+** decode 4 '6-bit' characters into 3 8-bit binary bytes
+*/
+static void decodeblock( unsigned char in[4], unsigned char out[3] )
+{   
+	out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
+	out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
+	out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
+}
+
+static int base64_map_rev(char c)
+{		   
+	int j;
+	for(j = 0; j < 65; j++)
+	{
+		if(c == cb64[j]) 
+		{ 
+			return j;
+		} 
+	}
+	return 0;
+}
+
+
+
+int Base64Decode(char *b64_inbuf, long b64_len, char *b64_outbuf) 
+{ 
+
+	int i, out_len = 0, n = 0; 
+	char raw_buf[4];
+
+	for(;n < b64_len/4; n++) 
+	{ 
+		for(i = 0; i < 4; i++) 
+			raw_buf[i] = base64_map_rev( b64_inbuf[(n * 4) + i]);
+
+		decodeblock((unsigned char*)raw_buf, (unsigned char*)&b64_outbuf[n*3] );
+		out_len += 3;
+		if(raw_buf[3] == 64)out_len--;
+		if(raw_buf[2] == 64)out_len--;
+	} 
+	return out_len;
+} 
+
+
+static void encodeblock( unsigned char *in, unsigned char *out, int len )
+{
+	out[0] = (unsigned char) cb64[ (int)(in[0] >> 2) ];
+	out[1] = (unsigned char) cb64[ (int)(((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4)) ];
+	out[2] = (unsigned char) (len > 1 ? cb64[ (int)(((in[1] & 0x0f) << 2) | ((in[2] & 0xc0) >> 6)) ] : '=');
+	out[3] = (unsigned char) (len > 2 ? cb64[ (int)(in[2] & 0x3f) ] : '=');
+}
+
+// 3xn > 4xn 尾部不加0 返回长度
+int Base64Encode(char *str_inbuf, long str_len, char *b64_outbuf)
+{
+	unsigned char in[3];
+	unsigned char out[4];
+	int in_len, out_len;
+	int i;
+
+	*in = (unsigned char) 0;
+	*out = (unsigned char) 0;
+	in_len = 0;
+	out_len = 0;
+
+	while( in_len < str_len ) {
+		in[0] = in[1] = in[2] = 0;
+
+		for( i = 0; i < 3 && in_len < str_len; i++,in_len++) {
+			in[i] = (unsigned char) str_inbuf[in_len];
+		}
+		encodeblock( in, (unsigned char*)(b64_outbuf + out_len), i );
+		out_len += 4;
+
+	}
+
+	return out_len;
 }
