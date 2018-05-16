@@ -5,8 +5,7 @@
 #define _FIFOQUEUE_H
 
 //#include "soc/rmt_struct.h"
-#include "arch_os.h"
-#include "infrared_nec_main.h"
+
 
 #ifndef TRUE
 #define TRUE  1
@@ -16,9 +15,9 @@
 #endif
 
 
-
-//#define ElemType       uint8
-#define QueueSize      4 //fifo队列的大小
+typedef unsigned char uint8;
+#define ElemType       uint8
+#define QueueSize      2 //fifo队列的大小
 #define QueueFull      0  //fifo满置0
 #define QueueEmpty     1  //FIFO空置1
 #define QueueOperateOk 2  //队列操作完成 赋值为2
@@ -31,8 +30,6 @@ struct FifoQueue
     unsigned short count;       //队列计数
 //    ElemType dat[QueueSize];
 	ElemType   dat[QueueSize];
-
-	os_mutex_t  *q_lock;
 
 };
 //Queue Initalize
