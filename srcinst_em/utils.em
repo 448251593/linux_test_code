@@ -370,4 +370,32 @@ macro SuperBackspace()
     SetBufIns(hbuf, ln, ipos - num);
     stop;
 }
+macro Insert_Note()
+{
+	//szMyName = getenv(MYNAME)
+	var  year;
+    var  month;
+    var  day;
+    var  commTime;
+    var  sysTime;
+ 
+    sysTime = GetSysTime(1);
+    year = sysTime.year;
+    month = sysTime.month;
+    day = sysTime.day;
+//    commTime = "@year@-@month@-@day@";
+
+	//hbuf = GetCurrentBuf()
+  	hwnd = GetCurrentWnd()
+    if (hwnd == 0)
+        stop
+//    sel = GetWndSel(hwnd)
+//	ln = sel.lnFirst;
+//	col = sel.ichFirst+1;
+	
+    hbuf = GetWndBuf(hwnd)
+
+	SetBufSelText(hbuf, "//add by bcg,@year@-@month@-@day@")
+
+}
 
